@@ -173,14 +173,11 @@ public class DefaultParser implements Parser{
         run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
     public static void main(String[] args){
-        System.getProperties().put("proxySet", "true");
-        System.getProperties().put("proxyHost", "host");
-        System.getProperties().put("proxyPort", "port"); 
-        //iteyeBlog();
+        iteyeBlog();
         //iteyeNews();
         //iteyeMagazines();
         //csdnBlog();
         //oschinaNews();
-        baidu("Java应用级产品开发平台APDPlat作者杨尚川专访");
+        //baidu("Java应用级产品开发平台APDPlat作者杨尚川专访");
     }
 }

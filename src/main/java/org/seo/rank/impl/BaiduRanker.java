@@ -198,7 +198,22 @@ public class BaiduRanker implements Ranker{
                         .execute()
                         .header("Location");
             //还要检查网页是否被重定向
-            
+            //这个检查会导致速度有点慢
+            //...
+            LOGGER.debug("检查是否有重定向："+realUrl);
+            String realUrl2 = Jsoup.connect(realUrl)
+                        .header("Accept", ACCEPT)
+                        .header("Accept-Encoding", ENCODING)
+                        .header("Accept-Language", LANGUAGE)
+                        .header("Connection", CONNECTION)
+                        .header("User-Agent", USER_AGENT)
+                        .followRedirects(false)
+                        .execute()
+                        .header("Location");
+            if(!StringUtils.isBlank(realUrl2)){
+                LOGGER.debug("检查到重定向到："+realUrl2);
+                return realUrl2;
+            }
             return realUrl;
         }catch(Exception e){
             LOGGER.error("URL转换异常", e);
