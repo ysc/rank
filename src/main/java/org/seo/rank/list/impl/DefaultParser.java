@@ -23,6 +23,7 @@ package org.seo.rank.list.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
@@ -108,76 +109,77 @@ public class DefaultParser implements Parser{
         }
         return null;
     }
-    private static void run(String url, String nextPageCssQuery, String nextPageText, String titleCssQuery){
+    private static List<Article> run(String url, String nextPageCssQuery, String nextPageText, String titleCssQuery){
         Parser parser = new DefaultParser();
         long start = System.currentTimeMillis();
         List<Article> articles = parser.parse(url, nextPageCssQuery, nextPageText, titleCssQuery);
         long cost = System.currentTimeMillis() - start;
         int i=1;
         for(Article article : articles){
-            System.out.println((i++)+"、"+article.getTitle()+" : "+article.getUrl());
+            LOGGER.info((i++) + "、" + article.getTitle() + " : " + article.getUrl());
         }
-        System.out.println("采集文章 "+articles.size()+" 篇耗时："+cost/1000.0+" 秒");
+        LOGGER.info("采集文章 " + articles.size() + " 篇耗时：" + cost / 1000.0 + " 秒");
+        return articles;
     }
-    private static void iteyeBlog(){
+    private static List<Article> iteyeBlog(){
         String url = "http://yangshangchuan.iteye.com/";
         String nextPageCssQuery = "html body div#page div#content.clearfix div#main div.pagination a.next_page";
         String nextPageText = "下一页 »";
         String titleCssQuery = "html body div#page div#content.clearfix div#main div.blog_main div.blog_title h3 a";
-        run(url, nextPageCssQuery, nextPageText, titleCssQuery);
+        return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static void iteyeNews(){
+    private static List<Article> iteyeNews(){
         String url = "http://www.iteye.com/news";
         String nextPageCssQuery = "html body div#page div#content.clearfix div#main div#index_main div.pagination a.next_page";
         String nextPageText = "下一页 »";
         //h3 > a表示h3后直接跟着a，这样 h3 span.category a 就不会被选择
         String titleCssQuery = "html body div#page div#content.clearfix div#main div#index_main div.news.clearfix div.content h3 > a";
-        run(url, nextPageCssQuery, nextPageText, titleCssQuery);
+        return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static void iteyeMagazines(){
+    private static List<Article> iteyeMagazines(){
         String url = "http://www.iteye.com/magazines";
         String nextPageCssQuery = "html body div#page div#content.clearfix div#main div#index_main div.pagination a.next_page";
         String nextPageText = "下一页 »";
         String titleCssQuery = "html body div#page div#content.clearfix div#main div#index_main div.news.clearfix div.content h3 a";
-        run(url, nextPageCssQuery, nextPageText, titleCssQuery);
+        return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static void csdnBlog(){
+    private static List<Article> csdnBlog(){
         String url = "http://blog.csdn.net/iispring";
         String nextPageCssQuery = "html body div#container div#body div#main div.main div#papelist.pagelist a";
         String titleCssQuery = "html body div#container div#body div#main div.main div#article_list.list div.list_item.article_item div.article_title h1 span.link_title a";
         String nextPageText = "下一页";
-        run(url, nextPageCssQuery, nextPageText, titleCssQuery);
+        return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static void oschinaNews(){
+    private static List<Article> oschinaNews(){
         String url = "http://www.oschina.net/news";
         String nextPageCssQuery = "html body div#OSC_Screen div#OSC_Content.CenterDiv div#NewsChannel.Channel div#NewsList.ListPanel div#RecentNewsList.panel ul.pager li.page.next a";
         String titleCssQuery = "html body div#OSC_Screen div#OSC_Content.CenterDiv div#NewsChannel.Channel div#NewsList.ListPanel div#RecentNewsList.panel ul.List li h2 a";
         String nextPageText = ">";
-        run(url, nextPageCssQuery, nextPageText, titleCssQuery);
+        return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static void oschinaBlog(){
+    private static List<Article> oschinaBlog(){
         String url = "http://my.oschina.net/apdplat/blog";
         String nextPageCssQuery = "html body div#OSC_Screen div#OSC_Content div.SpaceList.BlogList ul.pager li.page.next a";
         String titleCssQuery = "html body div#OSC_Screen div#OSC_Content div.SpaceList.BlogList ul li.Blog div.BlogTitle div.title h2 a";
         String nextPageText = ">";
-        run(url, nextPageCssQuery, nextPageText, titleCssQuery);
+        return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static void baidu(String query){
+    private static List<Article> baidu(String query){
         //对查询词进行编码
         try {
             query = URLEncoder.encode(query, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("url构造失败", e);
-            return ;
+            return Collections.emptyList();
         }
         if(StringUtils.isBlank(query)){
-            return ;
+            return Collections.emptyList();
         }
         String url = "http://www.baidu.com/s?wd=" + query;
         String nextPageCssQuery = "html body div div div p#page a.n";
         String titleCssQuery = "html body div div div div div h3.t a";
         String nextPageText = "下一页>";
-        run(url, nextPageCssQuery, nextPageText, titleCssQuery);
+        return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
     public static void main(String[] args){
         iteyeBlog();
