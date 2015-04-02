@@ -155,6 +155,13 @@ public class DefaultParser implements Parser{
         String nextPageText = ">";
         run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
+    private static void oschinaBlog(){
+        String url = "http://my.oschina.net/apdplat/blog";
+        String nextPageCssQuery = "html body div#OSC_Screen div#OSC_Content div.SpaceList.BlogList ul.pager li.page.next a";
+        String titleCssQuery = "html body div#OSC_Screen div#OSC_Content div.SpaceList.BlogList ul li.Blog div.BlogTitle div.title h2 a";
+        String nextPageText = ">";
+        run(url, nextPageCssQuery, nextPageText, titleCssQuery);
+    }
     private static void baidu(String query){
         //对查询词进行编码
         try {
