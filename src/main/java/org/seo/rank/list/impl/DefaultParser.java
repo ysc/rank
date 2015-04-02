@@ -22,9 +22,10 @@ package org.seo.rank.list.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -181,12 +182,43 @@ public class DefaultParser implements Parser{
         String nextPageText = "下一页>";
         return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
+
+    /**
+     * 比较我的OSCHINA博客和ITEYE博客的异同
+     */
+    public static void blogCompare(){
+        List<Article> ob = oschinaBlog();
+        List<Article> ib = iteyeBlog();
+        Map<String, String> om = new HashMap<>();
+        Map<String, String> im = new HashMap<>();
+        ob.stream().forEach(b->om.put(b.getTitle(), b.getUrl()));
+        ib.stream().forEach(b->im.put(b.getTitle(), b.getUrl()));
+        List<String> iteyeBlog   = ib.stream().map(b -> b.getTitle().replace("[置顶]", "").trim()).sorted().collect(Collectors.toList());
+        List<String> oschinaBlog = ob.stream().map(b -> b.getTitle()).sorted().collect(Collectors.toList());
+
+        List<String> commons = oschinaBlog.stream().filter(b -> iteyeBlog.contains(b)).collect(Collectors.toList());
+        LOGGER.info("<h4>oschina和iteye都有("+commons.size()+")：</h4>");
+        AtomicInteger j = new AtomicInteger();
+        commons.forEach(item -> LOGGER.info(j.incrementAndGet()+"、"+item+"    <a target=\"_blank\" href=\""+om.get(item)+"\">oschina</a>    <a target=\"_blank\" href=\""+im.get(item)+"\">iteye</a><br/>"));
+
+        List<String> oschina = oschinaBlog.stream().filter(i -> !iteyeBlog.contains(i)).collect(Collectors.toList());
+        LOGGER.info("<h4>oschina独有("+oschina.size()+")：</h4>");
+        AtomicInteger l = new AtomicInteger();
+        oschina.forEach(item -> LOGGER.info(l.incrementAndGet()+"、<a target=\"_blank\" href=\""+om.get(item)+"\">"+item+"</a><br/>"));
+
+        List<String> iteye = iteyeBlog.stream().filter(i -> !oschinaBlog.contains(i)).collect(Collectors.toList());
+        LOGGER.info("<h4>iteye独有("+iteye.size()+")：</h4>");
+        AtomicInteger k = new AtomicInteger();
+        iteye.forEach(item -> LOGGER.info(k.incrementAndGet()+"、<a target=\"_blank\" href=\""+im.get(item)+"\">"+item+"</a><br/>"));
+    }
     public static void main(String[] args){
-        iteyeBlog();
+        //iteyeBlog();
         //iteyeNews();
         //iteyeMagazines();
         //csdnBlog();
         //oschinaNews();
+        //oschinaBlog();
         //baidu("Java应用级产品开发平台APDPlat作者杨尚川专访");
+        blogCompare();
     }
 }
