@@ -311,7 +311,14 @@ public class BaiduRanker implements Ranker{
         LOGGER.info("排名博文数目：" + ranks.size());
         LOGGER.info("<ol>");
         map.entrySet().stream().sorted((a,b)->a.getValue()-b.getValue()).forEach(e -> {
-            LOGGER.info("<li><a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + e.getKey() + "\">" + e.getKey() + "(" + e.getValue() + ")</a></li>");
+            String query = null;
+            try {
+                query = URLEncoder.encode(e.getKey(), "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                LOGGER.error("url构造失败", ex);
+                return ;
+            }
+            LOGGER.info("<li><a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + query + "\">" + e.getKey() + "(" + e.getValue() + ")</a></li>");
         });
         LOGGER.info("</ol>");
     }
