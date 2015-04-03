@@ -110,7 +110,7 @@ public class DefaultParser implements Parser{
         }
         return null;
     }
-    private static List<Article> run(String url, String nextPageCssQuery, String nextPageText, String titleCssQuery){
+    public static List<Article> run(String url, String nextPageCssQuery, String nextPageText, String titleCssQuery){
         Parser parser = new DefaultParser();
         long start = System.currentTimeMillis();
         List<Article> articles = parser.parse(url, nextPageCssQuery, nextPageText, titleCssQuery);
@@ -122,14 +122,14 @@ public class DefaultParser implements Parser{
         LOGGER.info("采集文章 " + articles.size() + " 篇耗时：" + cost / 1000.0 + " 秒");
         return articles;
     }
-    private static List<Article> iteyeBlog(){
+    public static List<Article> iteyeBlog(){
         String url = "http://yangshangchuan.iteye.com/";
         String nextPageCssQuery = "html body div#page div#content.clearfix div#main div.pagination a.next_page";
         String nextPageText = "下一页 »";
         String titleCssQuery = "html body div#page div#content.clearfix div#main div.blog_main div.blog_title h3 a";
         return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static List<Article> iteyeNews(){
+    public static List<Article> iteyeNews(){
         String url = "http://www.iteye.com/news";
         String nextPageCssQuery = "html body div#page div#content.clearfix div#main div#index_main div.pagination a.next_page";
         String nextPageText = "下一页 »";
@@ -137,35 +137,35 @@ public class DefaultParser implements Parser{
         String titleCssQuery = "html body div#page div#content.clearfix div#main div#index_main div.news.clearfix div.content h3 > a";
         return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static List<Article> iteyeMagazines(){
+    public static List<Article> iteyeMagazines(){
         String url = "http://www.iteye.com/magazines";
         String nextPageCssQuery = "html body div#page div#content.clearfix div#main div#index_main div.pagination a.next_page";
         String nextPageText = "下一页 »";
         String titleCssQuery = "html body div#page div#content.clearfix div#main div#index_main div.news.clearfix div.content h3 a";
         return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static List<Article> csdnBlog(){
+    public static List<Article> csdnBlog(){
         String url = "http://blog.csdn.net/iispring";
         String nextPageCssQuery = "html body div#container div#body div#main div.main div#papelist.pagelist a";
         String titleCssQuery = "html body div#container div#body div#main div.main div#article_list.list div.list_item.article_item div.article_title h1 span.link_title a";
         String nextPageText = "下一页";
         return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static List<Article> oschinaNews(){
+    public static List<Article> oschinaNews(){
         String url = "http://www.oschina.net/news";
         String nextPageCssQuery = "html body div#OSC_Screen div#OSC_Content.CenterDiv div#NewsChannel.Channel div#NewsList.ListPanel div#RecentNewsList.panel ul.pager li.page.next a";
         String titleCssQuery = "html body div#OSC_Screen div#OSC_Content.CenterDiv div#NewsChannel.Channel div#NewsList.ListPanel div#RecentNewsList.panel ul.List li h2 a";
         String nextPageText = ">";
         return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static List<Article> oschinaBlog(){
+    public static List<Article> oschinaBlog(){
         String url = "http://my.oschina.net/apdplat/blog";
         String nextPageCssQuery = "html body div#OSC_Screen div#OSC_Content div.SpaceList.BlogList ul.pager li.page.next a";
         String titleCssQuery = "html body div#OSC_Screen div#OSC_Content div.SpaceList.BlogList ul li.Blog div.BlogTitle div.title h2 a";
         String nextPageText = ">";
         return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
-    private static List<Article> baidu(String query){
+    public static List<Article> baidu(String query){
         //对查询词进行编码
         try {
             query = URLEncoder.encode(query, "UTF-8");
