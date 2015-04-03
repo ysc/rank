@@ -23,7 +23,10 @@ package org.seo.rank.impl;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,6 +34,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.seo.rank.Ranker;
 import org.seo.rank.list.UrlTools;
+import org.seo.rank.list.impl.DefaultParser;
 import org.seo.rank.model.Rank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -222,7 +226,7 @@ public class BaiduRanker implements Ranker{
     }
     public static void main(String[] args){
         BaiduRanker ranker = new BaiduRanker();
-        
+        /*
         Rank rank = new Rank();
         rank.setKeyword("Java应用级产品开发平台APDPlat作者杨尚川专访");
         rank.setUrl("http://www.iteye.com/magazines/113");
@@ -246,6 +250,26 @@ public class BaiduRanker implements Ranker{
         rank.setUrl("http://www.manmankan.com/dy2013/zongyi/201306/6.shtml");
         ranker.rank(rank);
         System.out.println(rank);
-        
+        */
+        //计算OSCHINA博文在百度的收录与排名情况
+        //将博文转换为排名对象
+        List<Rank> ranks = new ArrayList<>();
+        DefaultParser.oschinaBlog().forEach(blog -> {
+            Rank rank = new Rank();
+            rank.setKeyword(blog.getTitle());
+            rank.setUrl(blog.getUrl());
+            ranks.add(rank);
+        });
+        //获取排名信息
+        ranker.rank(ranks);
+        //按排名排序
+        Map<String, Integer> map = new HashMap<>();
+        ranks.forEach(rank -> map.put(rank.getKeyword(), rank.getRank()));
+        LOGGER.info("排名博文数目：" + ranks.size());
+        LOGGER.info("<ol>");
+        map.entrySet().stream().sorted((a,b)->a.getValue()-b.getValue()).forEach(e -> {
+            LOGGER.info("<li><a href=\"http://www.baidu.com/s?wd=" + e.getKey() + "\">" + e.getKey() + "(" + e.getValue() + ")</a></li>");
+        });
+        LOGGER.info("</ol>");
     }
 }
