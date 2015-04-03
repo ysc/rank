@@ -268,7 +268,7 @@ public class BaiduRanker implements Ranker{
         LOGGER.info("排名博文数目：" + ranks.size());
         LOGGER.info("<ol>");
         map.entrySet().stream().sorted((a,b)->a.getValue()-b.getValue()).forEach(e -> {
-            LOGGER.info("<li><a href=\"http://www.baidu.com/s?wd=" + e.getKey() + "\">" + e.getKey() + "(" + e.getValue() + ")</a></li>");
+            LOGGER.info("<li><a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + e.getKey() + "\">" + e.getKey() + "(" + e.getValue() + ")</a></li>");
         });
         LOGGER.info("</ol>");
     }
