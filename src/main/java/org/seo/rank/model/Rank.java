@@ -67,6 +67,9 @@ public class Rank {
         this.index = index;
     }
     public int getRank() {
+        if(!isIndex()){
+            return -1;
+        }
         return rank;
     }
 
