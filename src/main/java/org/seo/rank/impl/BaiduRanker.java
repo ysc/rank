@@ -28,19 +28,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.seo.rank.Ranker;
+import org.seo.rank.list.DynamicIp;
 import org.seo.rank.list.UrlTools;
 import org.seo.rank.list.impl.DefaultParser;
+import org.seo.rank.model.Article;
 import org.seo.rank.model.Rank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 判断网页是否被搜索引擎收录
+ * 判断网页是否被搜索引擎收录以及收录之后的排名情况
  * @author 杨尚川
  */
 public class BaiduRanker implements Ranker{
@@ -50,10 +53,11 @@ public class BaiduRanker implements Ranker{
     private static final String LANGUAGE = "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3";
     private static final String CONNECTION = "keep-alive";
     private static final String HOST = "www.baidu.com";
+    private static final String REFERER = "http://www.baidu.com";
     private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:31.0) Gecko/20100101 Firefox/31.0";
     
     //获取多少页
-    private static final int PAGE = 5;
+    private static final int PAGE = 15;
     private static final int PAGESIZE = 10;
 
     @Override
@@ -76,6 +80,9 @@ public class BaiduRanker implements Ranker{
         }
         //检查是否被百度收录
         searchBaiduIndex(rank);
+        if(!rank.isIndex()){
+            return;
+        }
         //检查百度排名
         String query = null;
         try {
@@ -90,7 +97,7 @@ public class BaiduRanker implements Ranker{
         for (int i = 0; i < PAGE; i++) {
             String path = "http://www.baidu.com/s?tn=monline_5_dg&ie=utf-8&wd=" + query+"&oq="+query+"&usm=3&f=8&bs="+query+"&rsv_bp=1&rsv_sug3=1&rsv_sug4=141&rsv_sug1=1&rsv_sug=1&pn=" + i * PAGESIZE;
             LOGGER.debug(path);
-            int r = searchBaiduRank(path, rank.getUrl());
+            int r = searchBaiduRank(path, rank);
             if (r > 0){
                 rank.setRank(r+i*10);
                 //找到排名
@@ -105,6 +112,7 @@ public class BaiduRanker implements Ranker{
     private void searchBaiduIndex(Rank rank) {
         String url = "url:"+rank.getUrl();
         url = "http://www.baidu.com/s?wd=" + url;
+        LOGGER.debug(url);
         try {
             Document document = Jsoup.connect(url)
                     .header("Accept", ACCEPT)
@@ -114,23 +122,25 @@ public class BaiduRanker implements Ranker{
                     .header("User-Agent", USER_AGENT)
                     .header("Host", HOST)
                     .get();
-            
-            String notFoundCssQuery = "html body div div div div div.nors p";
+
+            String notFoundCssQuery = "html body div div div div div p";
             Elements elements = document.select(notFoundCssQuery);
             for(Element element : elements){
                 String text = element.text();
                 if(text.contains("抱歉，没有找到与") && text.contains("相关的网页。")){
                     //未被百度收录
+                    LOGGER.debug("未被百度收录");
                     rank.setIndex(false);
                     return;
                 }
             }
-            String numberCssQuery = "html body div div div p#page span.nums";
+            String numberCssQuery = "html body div div div div.nums";
             elements = document.select(numberCssQuery);
             for(Element element : elements){
                 String text = element.text();
                 if(text.equals("百度为您找到相关结果约1个")){
                     //百度收录
+                    LOGGER.debug("被百度收录");
                     rank.setIndex(true);
                     return;
                 }
@@ -138,32 +148,40 @@ public class BaiduRanker implements Ranker{
         } catch (IOException ex) {
             LOGGER.error("搜索出错",ex);
         }
+        LOGGER.debug("未被百度收录");
     }
     /**
      * 检查百度排名
      * @param url 检查百度的URL
-     * @param targetUrl 网页的URL
+     * @param rank 网页排名
      * @return 
      */
-    private int searchBaiduRank(String url, String targetUrl) {
+    private int searchBaiduRank(String url, Rank rank) {
+        String targetUrl = rank.getUrl();
         try {
             Document document = Jsoup.connect(url)
                     .header("Accept", ACCEPT)
                     .header("Accept-Encoding", ENCODING)
                     .header("Accept-Language", LANGUAGE)
                     .header("Connection", CONNECTION)
-                    .header("User-Agent", USER_AGENT)
                     .header("Host", HOST)
+                    .header("Referer", REFERER)
+                    .header("User-Agent", USER_AGENT)
                     .get();
             String titleCssQuery = "html body div div div div div h3.t a";
             Elements elements = document.select(titleCssQuery);
             int i=0;
             for(Element element : elements){
-                if(StringUtils.isBlank(element.text())){
+                String title = element.text();
+                if(StringUtils.isBlank(title)){
                     continue;
                 }
                 i++;
-                LOGGER.debug(i+":"+element.text());
+                LOGGER.debug(i+":"+title);
+                if(!title.contains(rank.getKeyword())){
+                    LOGGER.debug("搜索结果标题不包括关键词，忽略");
+                    continue;
+                }
                 String href = element.attr("href");
                 href = UrlTools.normalizeUrl(url, href);
                 String realUrl = urlConvert(href);
@@ -190,39 +208,61 @@ public class BaiduRanker implements Ranker{
                 //不需要转换URL
                 return url;
             }
-            String realUrl = Jsoup.connect(url)
-                        .header("Accept", ACCEPT)
-                        .header("Accept-Encoding", ENCODING)
-                        .header("Accept-Language", LANGUAGE)
-                        .header("Connection", CONNECTION)
-                        .header("User-Agent", USER_AGENT)
-                        .header("Host", HOST)
-                        //百度会返回302临时重定向，重定向到真实的网页地址
-                        .followRedirects(false)
-                        .execute()
-                        .header("Location");
-            //还要检查网页是否被重定向
+            LOGGER.debug("转换前的URL："+url);
+            Connection.Response response = getResponse(url);
+            //这里要处理爬虫限制
+            if(response==null || response.body().contains("请您点击按钮解除封锁")
+                    || response.body().contains("请输入以下验证码")){
+                //使用新的IP地址
+                DynamicIp.toNewIp();
+                response = getResponse(url);
+            }
+            String realUrl = response.header("Location");
+            LOGGER.debug("转换后的URL："+realUrl);
+            //检查网页是否被重定向
             //这个检查会导致速度有点慢
-            //...
+            //这个检测基本没有必要，除非是那种极其特殊的网站，ITEYE曾经就是，后来在我的建议下改进了
+            /*
             LOGGER.debug("检查是否有重定向："+realUrl);
-            String realUrl2 = Jsoup.connect(realUrl)
-                        .header("Accept", ACCEPT)
-                        .header("Accept-Encoding", ENCODING)
-                        .header("Accept-Language", LANGUAGE)
-                        .header("Connection", CONNECTION)
-                        .header("User-Agent", USER_AGENT)
-                        .followRedirects(false)
-                        .execute()
-                        .header("Location");
+            Connection.Response response = getResponse(realUrl);
+            //这里要处理爬虫限制
+            if(response==null || response.body().contains("请您点击按钮解除封锁")
+                              || response.body().contains("请输入以下验证码")){
+                //使用新的IP地址
+                DynamicIp.toNewIp();
+                response = getResponse(realUrl);
+            }
+            String realUrl2 = response.header("Location");
             if(!StringUtils.isBlank(realUrl2)){
                 LOGGER.debug("检查到重定向到："+realUrl2);
                 return realUrl2;
             }
+            */
             return realUrl;
         }catch(Exception e){
             LOGGER.error("URL转换异常", e);
         }
         return url;
+    }
+    private static Connection.Response getResponse(String url) {
+        try{
+            Connection.Response response = Jsoup.connect(url)
+                    .header("Accept", ACCEPT)
+                    .header("Accept-Encoding", ENCODING)
+                    .header("Accept-Language", LANGUAGE)
+                    .header("Connection", CONNECTION)
+                    .header("Host", HOST)
+                    .header("Referer", REFERER)
+                    .header("User-Agent", USER_AGENT)
+                    .ignoreContentType(true)
+                    .timeout(30000)
+                    .followRedirects(false)
+                    .execute();
+            return response;
+        } catch (Exception e){
+            LOGGER.debug("获取页面失败：", e);
+        }
+        return null;
     }
     public static void main(String[] args){
         BaiduRanker ranker = new BaiduRanker();
@@ -252,9 +292,12 @@ public class BaiduRanker implements Ranker{
         System.out.println(rank);
         */
         //计算OSCHINA博文在百度的收录与排名情况
+        //List<Article> articles = DefaultParser.oschinaBlog();
+        //计算ITEYE博文在百度的收录与排名情况
+        List<Article> articles = DefaultParser.iteyeBlog();
         //将博文转换为排名对象
         List<Rank> ranks = new ArrayList<>();
-        DefaultParser.oschinaBlog().forEach(blog -> {
+        articles.forEach(blog -> {
             Rank rank = new Rank();
             rank.setKeyword(blog.getTitle());
             rank.setUrl(blog.getUrl());
