@@ -5,8 +5,8 @@ target/
 logs/
 data/
 .idea/
-superword.iml
-superword.ipr
-superword.iws
+Rank.iml
+Rank.ipr
+Rank.iws
 .gradle/
 build/
