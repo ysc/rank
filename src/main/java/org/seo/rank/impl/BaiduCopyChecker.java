@@ -214,7 +214,7 @@ public class BaiduCopyChecker implements CopyChecker {
         //检查
         Map<Article, Set<String>> result = copyChecker.check(articles);
         //输出检查报告
-        LOGGER.info("检查博文数目：" + articles.size()+"<br/>");
+        LOGGER.info("<h4>检查博文数目：" + articles.size()+"</h4>");
         AtomicInteger i = new AtomicInteger();
         result.entrySet().stream().sorted((a,b)->b.getValue().size()-a.getValue().size()).forEach(e -> {
             String query = null;
@@ -224,14 +224,14 @@ public class BaiduCopyChecker implements CopyChecker {
                 LOGGER.error("url构造失败", ex);
                 return;
             }
-            LOGGER.info(i.incrementAndGet()+"、<a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + query + "\">" + e.getKey().getTitle() + "</a><br/>");
             if(e.getValue().size()>0) {
-                LOGGER.info("抄袭链接有("+e.getValue().size()+")个，分别是：");
+                LOGGER.info("<h4>"+i.incrementAndGet()+"、<a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + query + "\">" + e.getKey().getTitle() + "</a>  抄袭链接有("+e.getValue().size()+")个</h4>");
+                LOGGER.info("抄袭链接：");
                 LOGGER.info("<ol>");
                 e.getValue().stream().sorted().forEach(url-> LOGGER.info("<li><a target=\"_blank\" href=\"" + url + "\">" + url + "</a></li>"));
                 LOGGER.info("</ol>");
             }else{
-                LOGGER.info("无抄袭链接");
+                LOGGER.info(i.incrementAndGet()+"、<a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + query + "\">" + e.getKey().getTitle() + "</a>  无抄袭链接<br/>");
             }
         });
     }
