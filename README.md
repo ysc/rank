@@ -4,4 +4,5 @@
 ###2、指定一个URL和关键词，返回使用关键词在搜索引擎中搜索的结果中URL的排名
 
 ###[计算OSCHINA博文在百度的收录与排名情况](http://my.oschina.net/apdplat/blog/395810)
+###[计算ITEYE博文在百度的收录与排名情况](http://my.oschina.net/apdplat/blog/395970)
 ###[我的ITEYE和OSCHINA博客的异同](http://my.oschina.net/apdplat/blog/395494)
