@@ -5,4 +5,6 @@
 
 ###[计算OSCHINA博文在百度的收录与排名情况](http://my.oschina.net/apdplat/blog/395810)
 ###[计算ITEYE博文在百度的收录与排名情况](http://my.oschina.net/apdplat/blog/395970)
+###[OSCHINA博文抄袭检查](http://my.oschina.net/apdplat/blog/396414)
+###[ITEYE博文抄袭检查](http://my.oschina.net/apdplat/blog/396411)
 ###[我的ITEYE和OSCHINA博客的异同](http://my.oschina.net/apdplat/blog/395494)
