@@ -49,6 +49,7 @@
         <commons-httpclient.version>3.1</commons-httpclient.version>
         <commons-lang.version>2.6</commons-lang.version>
         <jackson.version>1.9.13</jackson.version>
+        <htmlunit.version>2.14</htmlunit.version>
         
         <maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
@@ -184,6 +185,11 @@
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <version>${htmlunit.version}</version>
         </dependency>
     </dependencies>
 </project>
