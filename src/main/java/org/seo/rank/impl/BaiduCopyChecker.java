@@ -41,6 +41,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 检查文章抄袭情况
@@ -116,7 +117,8 @@ public class BaiduCopyChecker implements CopyChecker {
                 }
                 i++;
                 LOGGER.debug(i+":"+_title);
-                if(!_title.contains(article.getTitle())){
+                if(_title.contains("百度翻译")
+                        || !contains(_title, article.getTitle())){
                     LOGGER.debug("搜索结果检查通过");
                     continue;
                 }
@@ -137,6 +139,36 @@ public class BaiduCopyChecker implements CopyChecker {
             LOGGER.error("搜索出错",ex);
         }
         return data;
+    }
+    /**
+     * 判断title2是否包含title1，去除标题中的特殊字符
+     * @param title2
+     * @param title1
+     * @return
+     */
+    private static boolean contains(String title2, String title1){
+        StringBuilder str2 = new StringBuilder();
+        StringBuilder str1 = new StringBuilder();
+        for(char c : title2.toCharArray()){
+            if(Character.isLetter(c)){
+                str2.append(c);
+            }
+        }
+        for(char c : title1.toCharArray()){
+            if(Character.isLetter(c)){
+                str1.append(c);
+            }
+        }
+        LOGGER.debug("转换标题前："+title2);
+        LOGGER.debug("转换标题后："+str2.toString());
+        LOGGER.debug("转换标题前："+title1);
+        LOGGER.debug("转换标题后："+str1.toString());
+        if(str2.toString().contains(str1.toString())){
+            LOGGER.debug(title2+" 【包含】 "+title1);
+            return true;
+        }
+        LOGGER.debug(title2+" 【不包含】 "+title1);
+        return false;
     }
     /**
      * 将百度的链接转换为网页的链接
@@ -211,6 +243,23 @@ public class BaiduCopyChecker implements CopyChecker {
         //List<Article> articles = DefaultParser.oschinaBlog();
         //计算ITEYE博文被抄袭的情况
         List<Article> articles = DefaultParser.iteyeBlog();
+        //这里排除不统计的博文
+        articles=articles.stream().filter(article ->
+                !(article.getTitle().contains("idioms")
+                || article.getTitle().contains("分布式内存文件系统：Tachyon")
+                || article.getTitle().contains("Nutch视频")
+                || article.getTitle().contains("如何解决BUG？")
+                || article.getTitle().contains("采集电子报纸")
+                || article.getTitle().contains("汉英双语的差异")
+                || article.getTitle().contains("分布式搜索算法")
+                || article.getTitle().contains("The Future of Compass & ElasticSearch")
+                || article.getTitle().contains("1208个合成词")
+                || article.getTitle().contains("Java远程调试")
+                || article.getTitle().contains("What a Wonderful Code")
+                || article.getTitle().contains("代码评审脚本")
+                || article.getTitle().contains("Linux Netcat command – The swiss army knife of net")
+                || article.getTitle().contains("common prefix different suffix"))
+        ).collect(Collectors.toList());
         //检查
         Map<Article, Set<String>> result = copyChecker.check(articles);
         //输出检查报告
@@ -224,14 +273,17 @@ public class BaiduCopyChecker implements CopyChecker {
                 LOGGER.error("url构造失败", ex);
                 return;
             }
+            String originURL = e.getKey().getUrl();
             if(e.getValue().size()>0) {
                 LOGGER.info("<h4>"+i.incrementAndGet()+"、<a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + query + "\">" + e.getKey().getTitle() + "</a>  抄袭链接有("+e.getValue().size()+")个</h4>");
+                LOGGER.info("原文链接：<a target=\"_blank\" href=\"" + originURL + "\">" + originURL + "</a><br/>");
                 LOGGER.info("抄袭链接：");
                 LOGGER.info("<ol>");
                 e.getValue().stream().sorted().forEach(url-> LOGGER.info("<li><a target=\"_blank\" href=\"" + url + "\">" + url + "</a></li>"));
                 LOGGER.info("</ol>");
             }else{
-                LOGGER.info(i.incrementAndGet()+"、<a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + query + "\">" + e.getKey().getTitle() + "</a>  无抄袭链接<br/>");
+                LOGGER.info(i.incrementAndGet()+"、<a target=\"_blank\" href=\"http://www.baidu.com/s?wd=" + query + "\">" + e.getKey().getTitle() + "</a><br/>");
+                LOGGER.info("原文链接：<a target=\"_blank\" href=\"" + originURL + "\">" + originURL + "</a>    无抄袭链接<br/>");
             }
         });
     }
