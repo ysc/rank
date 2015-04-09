@@ -70,7 +70,6 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
     }
 
     private double score(Blog blog1, Blog blog2){
-        LOGGER.info("判断博文是否相似：");
         //分词
         List<Word> blog1Words = WordSegmenter.seg(blog1.getTitle()+"\n"+blog1.getContent());
         List<Word> blog2Words = WordSegmenter.seg(blog2.getTitle()+"\n"+blog2.getContent());
@@ -83,9 +82,9 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
             showDetail(blog2, blog2Words, blog2WordsFre);
         }
         //使用简单共有词判定
-        //return simpleScore(blog1WordsFre, blog2WordsFre);
+        return simpleScore(blog1WordsFre, blog2WordsFre);
         //使用余弦相似度判定
-        return cosScore(blog1WordsFre, blog2WordsFre);
+        //return cosScore(blog1WordsFre, blog2WordsFre);
     }
 
     /**
