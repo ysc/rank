@@ -26,4 +26,5 @@ package org.seo.rank;
  */
 public interface SimilarChecker {
     public boolean isSimilar(String url1, String url2);
+    public double similarScore(String url1, String url2);
 }
