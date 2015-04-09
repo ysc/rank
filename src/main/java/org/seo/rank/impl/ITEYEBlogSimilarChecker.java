@@ -254,6 +254,7 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
                 || html.contains("请您点击按钮解除封锁")
                 || html.contains("请输入以下验证码"))
                 && times<4){
+            times++;
             //使用新的IP地址
             DynamicIp.toNewIp();
             html = getHtmlInternal(url);
