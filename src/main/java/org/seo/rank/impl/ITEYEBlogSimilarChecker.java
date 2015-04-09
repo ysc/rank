@@ -31,6 +31,7 @@ import org.seo.rank.list.DynamicIp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -172,9 +173,12 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
                     bb.addAndGet(oneOfTheDimension);
                 }
             });
+
         double aaa = Math.sqrt(aa.get());
         double bbb = Math.sqrt(bb.get());
-        double cos = ab.get()/(aaa*bbb);
+        //使用BigDecimal保证精确计算浮点数
+        BigDecimal aabb = BigDecimal.valueOf(aaa).multiply(BigDecimal.valueOf(bbb));
+        double cos = ab.get()/aabb.doubleValue();
         return cos;
     }
 
@@ -187,7 +191,7 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
         LOGGER.debug("\t"+blog.getContent());
         LOGGER.debug("博文长度："+blog.getContent().length());
         LOGGER.debug("博文分词结果：");
-        LOGGER.debug("\t"+blogWords);
+        LOGGER.debug("\t" + blogWords);
         LOGGER.debug("博文词频统计：");
         AtomicInteger c = new AtomicInteger();
         blogWordsFre
