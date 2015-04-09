@@ -31,10 +31,7 @@ import org.seo.rank.list.DynamicIp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -78,6 +75,19 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
             showDetail(blog1, blog1Words, blog1WordsFre);
             showDetail(blog2, blog2Words, blog2WordsFre);
         }
+        //使用简单共有词判定
+        //return simple(blog1WordsFre, blog2WordsFre);
+        //使用余弦相似度判定
+        return cos(blog1WordsFre, blog2WordsFre);
+    }
+
+    /**
+     * 判定相似性的方式一：简单共有词
+     * @param blog1WordsFre
+     * @param blog2WordsFre
+     * @return
+     */
+    private boolean simple(Map<Word, AtomicInteger> blog1WordsFre, Map<Word, AtomicInteger> blog2WordsFre){
         //判断有几个相同的词
         AtomicInteger intersectionLength = new AtomicInteger();
         blog1WordsFre.keySet().forEach(word -> {
@@ -96,6 +106,76 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
         LOGGER.info("博文1和2共有的词数"+intersectionLength.get()+"小于阈值：" + threshold);
         LOGGER.info("判断为不相似");
         return false;
+    }
+
+    /**
+     * 判定相似性的方式二：余弦相似度
+     * @param blog1WordsFre
+     * @param blog2WordsFre
+     * @return
+     */
+    private boolean cos(Map<Word, AtomicInteger> blog1WordsFre, Map<Word, AtomicInteger> blog2WordsFre){
+        double score = cosScore(blog1WordsFre, blog2WordsFre);
+        LOGGER.info("博文1和2的余弦夹角值：" + score);
+        if(score>=THRESHOLD_RATE){
+            LOGGER.info("博文1和2的余弦夹角值"+score+"大于或等于阈值：" + THRESHOLD_RATE);
+            LOGGER.info("判断为相似");
+            return true;
+        }
+        LOGGER.info("博文1和2的余弦夹角值"+score+"小于阈值：" + THRESHOLD_RATE);
+        LOGGER.info("判断为不相似");
+        return false;
+    }
+    /**
+     *
+     * 余弦夹角原理：
+     * 向量a=(x1,y1),向量b=(x2,y2)
+     * a.b=x1x2+y1y2
+     * |a|=根号[(x1)^2+(y1)^2],|b|=根号[(x2)^2+(y2)^2]
+     * a,b的夹角的余弦cos=a.b/|a|*|b|=(x1x2+y1y2)/根号[(x1)^2+(y1)^2]*根号[(x2)^2+(y2)^2]
+     * @param blog1WordsFre
+     * @param blog2WordsFre
+     */
+    private double cosScore(Map<Word, AtomicInteger> blog1WordsFre, Map<Word, AtomicInteger> blog2WordsFre){
+        Set<Word> words = new HashSet<>();
+        words.addAll(blog1WordsFre.keySet());
+        words.addAll(blog2WordsFre.keySet());
+        //向量的维度为words的大小，每一个维度的权重是词频，注意的是，中文分词的时候已经去了停用词
+        //a.b
+        AtomicInteger ab = new AtomicInteger();
+        //|a|
+        AtomicInteger aa = new AtomicInteger();
+        //|b|
+        AtomicInteger bb = new AtomicInteger();
+        //计算
+        words
+            .stream()
+            .forEach(word -> {
+                AtomicInteger x1 = blog1WordsFre.get(word);
+                AtomicInteger x2 = blog2WordsFre.get(word);
+                if(x1!=null && x2!=null) {
+                    //x1x2
+                    int oneOfTheDimension = x1.get() * x2.get();
+                    //+
+                    ab.addAndGet(oneOfTheDimension);
+                }
+                if(x1!=null){
+                    //(x1)^2
+                    int oneOfTheDimension = x1.get() * x1.get();
+                    //+
+                    aa.addAndGet(oneOfTheDimension);
+                }
+                if(x2!=null){
+                    //(x2)^2
+                    int oneOfTheDimension = x2.get() * x2.get();
+                    //+
+                    bb.addAndGet(oneOfTheDimension);
+                }
+            });
+        double aaa = Math.sqrt(aa.get());
+        double bbb = Math.sqrt(bb.get());
+        double cos = ab.get()/(aaa*bbb);
+        return cos;
     }
 
     private void showDetail(Blog blog, List<Word> blogWords, Map<Word, AtomicInteger> blogWordsFre){
