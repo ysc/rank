@@ -55,17 +55,21 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
 
     @Override
     public boolean isSimilar(String url1, String url2) {
+        return similarScore(url1, url2)>=THRESHOLD_RATE;
+    }
+    @Override
+    public double similarScore(String url1, String url2) {
         Blog blog1 = getBlog(url1);
         if(blog1!=null) {
             Blog blog2 = getBlog(url2);
             if(blog2!=null) {
-                return check(blog1, blog2);
+                return score(blog1, blog2);
             }
         }
-        return false;
+        return 0;
     }
 
-    private boolean check(Blog blog1, Blog blog2){
+    private double score(Blog blog1, Blog blog2){
         LOGGER.info("判断博文是否相似：");
         //分词
         List<Word> blog1Words = WordSegmenter.seg(blog1.getTitle()+"\n"+blog1.getContent());
@@ -79,9 +83,9 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
             showDetail(blog2, blog2Words, blog2WordsFre);
         }
         //使用简单共有词判定
-        //return simple(blog1WordsFre, blog2WordsFre);
+        //return simpleScore(blog1WordsFre, blog2WordsFre);
         //使用余弦相似度判定
-        return cos(blog1WordsFre, blog2WordsFre);
+        return cosScore(blog1WordsFre, blog2WordsFre);
     }
 
     /**
@@ -90,7 +94,7 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
      * @param blog2WordsFre
      * @return
      */
-    private boolean simple(Map<Word, AtomicInteger> blog1WordsFre, Map<Word, AtomicInteger> blog2WordsFre){
+    private double simpleScore(Map<Word, AtomicInteger> blog1WordsFre, Map<Word, AtomicInteger> blog2WordsFre){
         //判断有几个相同的词
         AtomicInteger intersectionLength = new AtomicInteger();
         blog1WordsFre.keySet().forEach(word -> {
@@ -98,39 +102,17 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
                 intersectionLength.incrementAndGet();
             }
         });
-        float threshold = Math.min(blog1WordsFre.size(), blog2WordsFre.size())*THRESHOLD_RATE;
-        LOGGER.info("阈值=Math.min("+blog1WordsFre.size()+", "+blog2WordsFre.size()+")*"+THRESHOLD_RATE+"=" + threshold);
-        LOGGER.info("博文1和2共有的词数：" + intersectionLength.get());
-        if(intersectionLength.get() >= threshold){
-            LOGGER.info("博文1和2共有的词数"+intersectionLength.get()+"大于或等于阈值：" + threshold);
-            LOGGER.info("判断为相似");
-            return true;
-        }
-        LOGGER.info("博文1和2共有的词数"+intersectionLength.get()+"小于阈值：" + threshold);
-        LOGGER.info("判断为不相似");
-        return false;
+        LOGGER.info("网页1有的词数：" + blog1WordsFre.size());
+        LOGGER.info("网页2有的词数：" + blog2WordsFre.size());
+        LOGGER.info("网页1和2共有的词数：" + intersectionLength.get());
+        double score = intersectionLength.get()/Math.min(blog1WordsFre.size(), blog2WordsFre.size());
+        LOGGER.info("相似度分值="+intersectionLength.get()+"/Math.min("+blog1WordsFre.size()+", "+blog2WordsFre.size()+")="+score);
+        return score;
     }
 
     /**
-     * 判定相似性的方式二：余弦相似度
-     * @param blog1WordsFre
-     * @param blog2WordsFre
-     * @return
-     */
-    private boolean cos(Map<Word, AtomicInteger> blog1WordsFre, Map<Word, AtomicInteger> blog2WordsFre){
-        double score = cosScore(blog1WordsFre, blog2WordsFre);
-        LOGGER.info("博文1和2的余弦夹角值：" + score);
-        if(score>=THRESHOLD_RATE){
-            LOGGER.info("博文1和2的余弦夹角值"+score+"大于或等于阈值：" + THRESHOLD_RATE);
-            LOGGER.info("判断为相似");
-            return true;
-        }
-        LOGGER.info("博文1和2的余弦夹角值"+score+"小于阈值：" + THRESHOLD_RATE);
-        LOGGER.info("判断为不相似");
-        return false;
-    }
-    /**
      *
+     * 判定相似性的方式二：余弦相似度
      * 余弦夹角原理：
      * 向量a=(x1,y1),向量b=(x2,y2)
      * a.b=x1x2+y1y2
@@ -337,7 +319,8 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
 
     public static void main(String[] args) {
         SimilarChecker similarChecker = new ITEYEBlogSimilarChecker();
-        similarChecker.isSimilar("http://baidu-27233181.iteye.com/blog/2200707",
+        double score = similarChecker.similarScore("http://baidu-27233181.iteye.com/blog/2200707",
                 "http://baidu-27233181.iteye.com/blog/2200706");
+        LOGGER.info("相似度分值："+score);
     }
 }
