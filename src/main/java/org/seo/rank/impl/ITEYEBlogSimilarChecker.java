@@ -58,7 +58,9 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
         Blog blog1 = getBlog(url1);
         if(blog1!=null) {
             Blog blog2 = getBlog(url2);
-            return check(blog1, blog2);
+            if(blog2!=null) {
+                return check(blog1, blog2);
+            }
         }
         return false;
     }
