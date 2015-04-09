@@ -63,7 +63,10 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
         if(blog1!=null) {
             Blog blog2 = getBlog(url2);
             if(blog2!=null) {
-                return score(blog1, blog2);
+                double score = score(blog1, blog2);
+                //取两位小数
+                score = (int)(score*100)/(double)100;
+                return score;
             }
         }
         return 0;
