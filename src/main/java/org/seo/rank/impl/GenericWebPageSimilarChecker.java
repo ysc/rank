@@ -53,18 +53,24 @@ public class GenericWebPageSimilarChecker implements SimilarChecker{
 
     @Override
     public boolean isSimilar(String url1, String url2) {
+        return similarScore(url1, url2)>=THRESHOLD_RATE;
+    }
+    @Override
+    public double similarScore(String url1, String url2) {
         WebPage webPage1 = getWebPage(url1);
         if(webPage1!=null) {
             WebPage webPage2 = getWebPage(url2);
             if(webPage2!=null) {
-                return check(webPage1, webPage2);
+                double score = score(webPage1, webPage2);
+                //取两位小数
+                score = (int)(score*100)/(double)100;
+                return score;
             }
         }
-        return false;
+        return 0;
     }
 
-    private boolean check(WebPage webPage1, WebPage webPage2){
-        LOGGER.info("判断网页是否相似：");
+    private double score(WebPage webPage1, WebPage webPage2){
         //分词
         List<Word> webPage1Words = WordSegmenter.seg(webPage1.getTitle()+"\n"+webPage1.getContent());
         List<Word> webPage2Words = WordSegmenter.seg(webPage2.getTitle()+"\n"+webPage2.getContent());
@@ -77,9 +83,9 @@ public class GenericWebPageSimilarChecker implements SimilarChecker{
             showDetail(webPage2, webPage2Words, webPage2WordsFre);
         }
         //使用简单共有词判定
-        //return simple(webPage1WordsFre, webPage2WordsFre);
+        //return simpleScore(webPage1WordsFre, webPage2WordsFre);
         //使用余弦相似度判定
-        return cos(webPage1WordsFre, webPage2WordsFre);
+        return cosScore(webPage1WordsFre, webPage2WordsFre);
     }
 
     /**
@@ -88,7 +94,7 @@ public class GenericWebPageSimilarChecker implements SimilarChecker{
      * @param webPage2WordsFre
      * @return
      */
-    private boolean simple(Map<Word, AtomicInteger> webPage1WordsFre, Map<Word, AtomicInteger> webPage2WordsFre){
+    private double simpleScore(Map<Word, AtomicInteger> webPage1WordsFre, Map<Word, AtomicInteger> webPage2WordsFre){
         //判断有几个相同的词
         AtomicInteger intersectionLength = new AtomicInteger();
         webPage1WordsFre.keySet().forEach(word -> {
@@ -96,39 +102,17 @@ public class GenericWebPageSimilarChecker implements SimilarChecker{
                 intersectionLength.incrementAndGet();
             }
         });
-        float threshold = Math.min(webPage1WordsFre.size(), webPage2WordsFre.size())*THRESHOLD_RATE;
-        LOGGER.info("阈值=Math.min("+webPage1WordsFre.size()+", "+webPage2WordsFre.size()+")*"+THRESHOLD_RATE+"=" + threshold);
+        LOGGER.info("网页1有的词数：" + webPage1WordsFre.size());
+        LOGGER.info("网页2有的词数：" + webPage2WordsFre.size());
         LOGGER.info("网页1和2共有的词数：" + intersectionLength.get());
-        if(intersectionLength.get() >= threshold){
-            LOGGER.info("网页1和2共有的词数"+intersectionLength.get()+"大于或等于阈值：" + threshold);
-            LOGGER.info("判断为相似");
-            return true;
-        }
-        LOGGER.info("网页1和2共有的词数"+intersectionLength.get()+"小于阈值：" + threshold);
-        LOGGER.info("判断为不相似");
-        return false;
+        double score = intersectionLength.get()/Math.min(webPage1WordsFre.size(), webPage2WordsFre.size());
+        LOGGER.info("相似度分值="+intersectionLength.get()+"/Math.min("+webPage1WordsFre.size()+", "+webPage2WordsFre.size()+")="+score);
+        return score;
     }
 
     /**
-     * 判定相似性的方式二：余弦相似度
-     * @param webPage1WordsFre
-     * @param webPage2WordsFre
-     * @return
-     */
-    private boolean cos(Map<Word, AtomicInteger> webPage1WordsFre, Map<Word, AtomicInteger> webPage2WordsFre){
-        double score = cosScore(webPage1WordsFre, webPage2WordsFre);
-        LOGGER.info("网页1和2的余弦夹角值：" + score);
-        if(score>=THRESHOLD_RATE){
-            LOGGER.info("网页1和2的余弦夹角值"+score+"大于或等于阈值：" + THRESHOLD_RATE);
-            LOGGER.info("判断为相似");
-            return true;
-        }
-        LOGGER.info("网页1和2的余弦夹角值"+score+"小于阈值：" + THRESHOLD_RATE);
-        LOGGER.info("判断为不相似");
-        return false;
-    }
-    /**
      *
+     * 判定相似性的方式二：余弦相似度
      * 余弦夹角原理：
      * 向量a=(x1,y1),向量b=(x2,y2)
      * a.b=x1x2+y1y2
@@ -330,20 +314,27 @@ public class GenericWebPageSimilarChecker implements SimilarChecker{
 
         List<String> commons = oschinaBlog.stream().filter(b -> iteyeBlog.contains(b)).collect(Collectors.toList());
         commons.remove("自动更改IP地址反爬虫封锁，支持多线程");
-        LOGGER.info("检查的博文数："+commons.size());
-        AtomicInteger i = new AtomicInteger();
+        Map<String, Double> result = new HashMap<>();
         AtomicInteger similarCount = new AtomicInteger();
         commons.forEach(title -> {
-            LOGGER.info("");
-            LOGGER.info("检查博文"+i.incrementAndGet()+"："+title);
-            LOGGER.info("地址1："+om.get(title));
-            LOGGER.info("地址2："+im.get(title));
-            boolean similar = isSimilar(om.get(title), im.get(title));
-            if(similar){
+            double score = similarScore(om.get(title), im.get(title));
+            result.put(title, score);
+            if (score >= THRESHOLD_RATE) {
                 similarCount.incrementAndGet();
             }
         });
-        LOGGER.info("检查的博文数："+commons.size()+"，相似数："+similarCount.get()+"，不相似数："+(commons.size()-similarCount.get()));
+        LOGGER.info("<h4>检查的博文数：" + commons.size() + "，相似度大于等于" + THRESHOLD_RATE + "的博文数：" + similarCount.get() + "，相似度小于" + THRESHOLD_RATE + "的博文数：" + (commons.size() - similarCount.get())+"</h4>");
+        AtomicInteger i = new AtomicInteger();
+        result
+            .entrySet()
+            .stream()
+            .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+            .forEach(e -> {
+                LOGGER.info("");
+                LOGGER.info("<h4>"+i.incrementAndGet() + "、检查博文" + "：" + e.getKey()+"，相似度分值："+e.getValue().doubleValue()+"</h4>");
+            LOGGER.info("\t博文地址1：<a target=\"_blank\" href=\""+om.get(e.getKey())+"\">"+om.get(e.getKey())+"</a><br/>");
+            LOGGER.info("\t博文地址2：<a target=\"_blank\" href=\""+im.get(e.getKey())+"\">"+im.get(e.getKey())+"</a><br/>");
+            });
     }
     public static void main(String[] args) throws Exception{
         GenericWebPageSimilarChecker genericWebPageSimilarChecker = new GenericWebPageSimilarChecker();
