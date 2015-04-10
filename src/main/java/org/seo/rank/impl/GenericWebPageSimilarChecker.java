@@ -83,9 +83,9 @@ public class GenericWebPageSimilarChecker implements SimilarChecker{
             showDetail(webPage2, webPage2Words, webPage2WordsFre);
         }
         //使用简单共有词判定
-        //return simpleScore(webPage1WordsFre, webPage2WordsFre);
+        return simpleScore(webPage1WordsFre, webPage2WordsFre);
         //使用余弦相似度判定
-        return cosScore(webPage1WordsFre, webPage2WordsFre);
+        //return cosScore(webPage1WordsFre, webPage2WordsFre);
     }
 
     /**
@@ -105,8 +105,8 @@ public class GenericWebPageSimilarChecker implements SimilarChecker{
         LOGGER.info("网页1有的词数：" + webPage1WordsFre.size());
         LOGGER.info("网页2有的词数：" + webPage2WordsFre.size());
         LOGGER.info("网页1和2共有的词数：" + intersectionLength.get());
-        double score = intersectionLength.get()/Math.min(webPage1WordsFre.size(), webPage2WordsFre.size());
-        LOGGER.info("相似度分值="+intersectionLength.get()+"/Math.min("+webPage1WordsFre.size()+", "+webPage2WordsFre.size()+")="+score);
+        double score = intersectionLength.get()/(double)Math.min(webPage1WordsFre.size(), webPage2WordsFre.size());
+        LOGGER.info("相似度分值="+intersectionLength.get()+"/(double)Math.min("+webPage1WordsFre.size()+", "+webPage2WordsFre.size()+")="+score);
         return score;
     }
 
