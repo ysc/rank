@@ -107,8 +107,8 @@ public class ITEYEBlogSimilarChecker implements SimilarChecker{
         LOGGER.info("网页1有的词数：" + blog1WordsFre.size());
         LOGGER.info("网页2有的词数：" + blog2WordsFre.size());
         LOGGER.info("网页1和2共有的词数：" + intersectionLength.get());
-        double score = intersectionLength.get()/Math.min(blog1WordsFre.size(), blog2WordsFre.size());
-        LOGGER.info("相似度分值="+intersectionLength.get()+"/Math.min("+blog1WordsFre.size()+", "+blog2WordsFre.size()+")="+score);
+        double score = intersectionLength.get()/(double)Math.min(blog1WordsFre.size(), blog2WordsFre.size());
+        LOGGER.info("相似度分值="+intersectionLength.get()+"/(double)Math.min("+blog1WordsFre.size()+", "+blog2WordsFre.size()+")="+score);
         return score;
     }
 
