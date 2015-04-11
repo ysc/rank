@@ -51,6 +51,7 @@
         <jackson.version>1.9.13</jackson.version>
         <htmlunit.version>2.14</htmlunit.version>
         <word.version>1.2</word.version>
+        <jcl-over-slf4j.version>1.6.4</jcl-over-slf4j.version>
         
         <maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
@@ -160,6 +161,12 @@
                 </exclusion>
             </exclusions>
             <scope>runtime</scope>
+        </dependency>
+        <!-- 拦截 apache commons logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${jcl-over-slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
