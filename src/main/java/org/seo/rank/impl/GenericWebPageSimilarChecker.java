@@ -25,7 +25,7 @@ import org.apdplat.word.segmentation.Word;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.seo.rank.SimilarChecker;
-import org.seo.rank.list.DynamicIp;
+import org.seo.rank.tools.DynamicIp;
 import org.seo.rank.list.impl.DefaultParser;
 import org.seo.rank.model.Article;
 import org.slf4j.Logger;

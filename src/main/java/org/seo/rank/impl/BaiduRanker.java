@@ -34,7 +34,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.seo.rank.Ranker;
-import org.seo.rank.list.DynamicIp;
+import org.seo.rank.tools.DynamicIp;
 import org.seo.rank.list.UrlTools;
 import org.seo.rank.list.impl.DefaultParser;
 import org.seo.rank.model.Article;

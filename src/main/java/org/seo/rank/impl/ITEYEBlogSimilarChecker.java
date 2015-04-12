@@ -27,7 +27,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.seo.rank.SimilarChecker;
-import org.seo.rank.list.DynamicIp;
+import org.seo.rank.tools.DynamicIp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

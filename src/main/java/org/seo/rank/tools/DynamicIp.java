@@ -18,7 +18,7 @@
  *
  */
 
-package org.seo.rank.list;
+package org.seo.rank.tools;
 
 
 import org.jsoup.Connection;
