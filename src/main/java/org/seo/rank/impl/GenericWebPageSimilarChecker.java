@@ -63,7 +63,7 @@ public class GenericWebPageSimilarChecker implements SimilarChecker{
             if(webPage2!=null) {
                 double score = score(webPage1, webPage2);
                 //取两位小数
-                score = (int)(score*100)/(double)100;
+                score = (int)(score*100+0.5)/(double)100;
                 return score;
             }
         }
