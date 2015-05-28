@@ -225,7 +225,7 @@ public class WordBasedGenericWebPageSimilarChecker implements SimilarChecker {
             result.put(title, contrastResult);
             LOGGER.info("进度：" + commons.size() + "/" + j.incrementAndGet());
         });
-        LOGGER.info("<h4>检查的博文数：" + commons.size() + "，相似度大于等于" + THRESHOLD_RATE + "的博文数：" + similarCount.get() + "，相似度小于" + THRESHOLD_RATE + "的博文数：" + (commons.size() - similarCount.get())+"</h4>");
+        LOGGER.info("<h4>检查的博文数：" + commons.size() + "，相似度大于等于" + THRESHOLD_RATE + "的博文数：" + similarCount.get() + "</h4>");
         AtomicInteger i = new AtomicInteger();
         result
             .entrySet()
