@@ -31,6 +31,7 @@ import org.seo.rank.tools.ProxyIp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -88,7 +89,7 @@ public class WordBasedGenericWebPageSimilarChecker implements SimilarChecker {
                     double score = textSimilarity.similarScore(webPage1.getContent(), webPage2.getContent());
                     result.append(textSimilarity.getClass().getSimpleName().replace("TextSimilarity", ""))
                             .append("=")
-                            .append(score)
+                            .append(BigDecimal.valueOf(score).toString())
                             .append(" ");
                 });
             }
