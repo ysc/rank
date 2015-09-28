@@ -37,7 +37,7 @@ public class VoteRanker {
     private static final String PROJECT_NAME = "div.project-detail a.project-name";
     private static final String PROJECT_DES = "div.project-detail div.project-description";
     private static final String PROJECT_OWNER = "div.project-detail div.project-owner";
-    private static final String VOTE_COUNT = "div.vote-action div.vote-button.vote-trigger span";
+    private static final String VOTE_COUNT = "div.vote-action div.vote-button span";
     public static Map<String, Integer> getRank(){
         String url = "http://i.100offer.com/projects?page=";
         Map<String, Integer> map = new HashMap<>();
@@ -47,6 +47,7 @@ public class VoteRanker {
                 for (Element element : Jsoup.parse(new URL(url + i), 60000).select(WORKS)) {
                     String projectName = element.select(PROJECT_NAME).text();
                     String voteCount = element.select(VOTE_COUNT).text();
+                    System.out.println(voteCount);
                     String des = element.select(PROJECT_DES).text().replace("故事", "");
                     String owner = element.select(PROJECT_OWNER).text().replace("Hot", "").replace("故事", "").replace("by&nbsp", "").replace("by ", "");
                     map.put(projectName+"_"+owner+"_"+des, Integer.parseInt(voteCount));
