@@ -47,7 +47,6 @@ public class VoteRanker {
                 for (Element element : Jsoup.parse(new URL(url + i), 60000).select(WORKS)) {
                     String projectName = element.select(PROJECT_NAME).text();
                     String voteCount = element.select(VOTE_COUNT).text();
-                    System.out.println(voteCount);
                     String des = element.select(PROJECT_DES).text().replace("故事", "");
                     String owner = element.select(PROJECT_OWNER).text().replace("Hot", "").replace("故事", "").replace("by&nbsp", "").replace("by ", "");
                     map.put(projectName+"_"+owner+"_"+des, Integer.parseInt(voteCount));
