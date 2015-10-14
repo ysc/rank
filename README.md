@@ -1,6 +1,6 @@
 ###rank是一个seo工具，用于分析网站的搜索引擎收录排名。
 
-[捐赠致谢](https://github.com/ysc/QuestionAnsweringSystem/wiki/donation)
+###[捐赠致谢](https://github.com/ysc/QuestionAnsweringSystem/wiki/donation)
 
 ###1、指定一个栏目入口页面，配置标题的CSS路径，配置下一页的CSS路径，配置下一页的标签文本，返回所有的文章标题和URL列表
 ###2、指定一个URL和关键词，返回使用关键词在搜索引擎中搜索的结果中URL的排名
