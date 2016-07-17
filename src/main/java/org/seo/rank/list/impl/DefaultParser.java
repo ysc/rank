@@ -160,9 +160,9 @@ public class DefaultParser implements Parser{
     }
     public static List<Article> oschinaBlog(){
         String url = "http://my.oschina.net/apdplat/blog";
-        String nextPageCssQuery = "html body div#OSC_Screen div#OSC_Content div.SpaceList.BlogList ul.pager li.page.next a";
-        String titleCssQuery = "html body div#OSC_Screen div#OSC_Content div.SpaceList.BlogList ul li.Blog div.BlogTitle div.title h2 a";
-        String nextPageText = ">";
+        String nextPageCssQuery = "html body div#OSC_Screen div#OSC_Content div.blog-user div.container div.flex-item div#search_list.flex-item-9.flex-item-md-9.content div#list.list.blog-list div.pages.sm-hide ul li a";
+        String titleCssQuery = "html body div#OSC_Screen div#OSC_Content div.blog-user div.container div.flex-item div#search_list.flex-item-9.flex-item-md-9.content div#list.list.blog-list div.list-item div.layout div.layout-column div.title a";
+        String nextPageText = "下一页";
         return run(url, nextPageCssQuery, nextPageText, titleCssQuery);
     }
     public static List<Article> baidu(String query){
