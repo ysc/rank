@@ -12,3 +12,5 @@
 ###[OSCHINA博文抄袭检查](http://my.oschina.net/apdplat/blog/396414)
 ###[ITEYE博文抄袭检查](http://my.oschina.net/apdplat/blog/396411)
 ###[我的ITEYE和OSCHINA博客的异同](http://my.oschina.net/apdplat/blog/395494)
+
+[https://travis-ci.org/ysc/rank](https://travis-ci.org/ysc/rank)
